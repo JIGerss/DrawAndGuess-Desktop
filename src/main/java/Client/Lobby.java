@@ -29,29 +29,40 @@ public class Lobby extends PApplet {
             //Enter account
             String name = JOptionPane.showInputDialog(null, "输入用户名：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
             if (name == null || name.equals("")) exitLobby();
+            String RegTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/test", "", "");
             boolean isCorrect = false;
             while (!isCorrect) {
                 //Enter password
-                String psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码(没有该用户则直接注册)：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
-                if (psw == null) break;
-                if (psw.equals("")) continue;
-                //request register & request login
-                String result1 = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + psw, "", "");
-                String result2 = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + psw, "", "");
-
-                if (result1 != null && result2 != null && !result1.contains("404") && !result2.contains("404")) {
-                    if (result1.contains("already exists")) {
-                        if (result2.contains("password is incorrect")) {
-                            JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜", JOptionPane.WARNING_MESSAGE);
-                            continue;
-                        } else if (result2.contains("Already Exists")) {
-                            JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜", JOptionPane.WARNING_MESSAGE);
-                            break;
-                        }
+                String psw;
+                if (RegTest != null) {
+                    if (!RegTest.contains("already exists")) {
+                        psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
+                        if (psw == null) break;
+                        if (psw.equals("")) continue;
+                        HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + psw, "", "");
+                        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + psw, "", "");
+                        Player = JSON.parseObject(login, User.class);
+                        isCorrect = true;
+                        isSucceed = true;
+                    } else {
+                        psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
+                        if (psw == null) break;
+                        if (psw.equals("")) continue;
+                        String loginTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + psw, "", "");
+                        if(loginTest != null) {
+                            if (loginTest.contains("password is incorrect")) {
+                                JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜", JOptionPane.WARNING_MESSAGE);
+                            } else if (loginTest.contains("Already Exists")) {
+                                JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜", JOptionPane.WARNING_MESSAGE);
+                                break;
+                            }else{
+                                Player = JSON.parseObject(loginTest, User.class);
+                                isCorrect = true;
+                                isSucceed = true;
+                            }
+                        }else
+                            error();
                     }
-                    Player = JSON.parseObject(result2, User.class);
-                    isCorrect = true;
-                    isSucceed = true;
                 } else
                     error();
             }
