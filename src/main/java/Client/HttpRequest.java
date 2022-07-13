@@ -44,8 +44,7 @@ public class HttpRequest {
             // 获取所有响应头字段
             Map<String, List<String>> map = connection.getHeaderFields();
             // 定义 BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line;
             while ((line = in.readLine()) != null) {
                 result.append(line);
@@ -53,6 +52,7 @@ public class HttpRequest {
         } catch (Exception e) {
             System.out.println("发送GET请求出现异常！" + e);
             e.printStackTrace();
+            System.exit(0);
         }
         // 使用finally块来关闭输入流
         finally {

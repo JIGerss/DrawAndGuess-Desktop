@@ -36,9 +36,7 @@ public class Clients extends PApplet {
         stroke(20);
         size(WIDTH, HEIGHT);
         URL = convertMD5(URL);
-        if (!isDrawer) HttpRequest.doPost(URL + "games/" + gameId + "/join", "", JSON.toJSONString(Player));
-        game = getGame();
-        players = getUsersInGame();
+        setVariables();
     }
 
     public void draw() {
@@ -46,21 +44,31 @@ public class Clients extends PApplet {
             Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
             frame.setVisible(true);
             isVisible = true;
-        } else {
-            if (requestTime == 60) {
-                requestTime = 0;
-                game = getGame();
-                players = getUsersInGame();
-            } else
-                requestTime++;
+            setVariables();
+        } else if (!Lobby.isGaming && !isVisible)
+            return;
+        if (requestTime == 60) {
+            requestTime = 0;
+            game = getGame();
+            players = getUsersInGame();
+        } else
+            requestTime++;
 
-            background(253, 248, 229);
-        }
+        background(253, 248, 229);
+
     }
 
     public void mousePressed() {
 
         quitGame();
+    }
+
+    private void setVariables() {
+        String result = null;
+        if (!isDrawer) result = HttpRequest.doPost(URL + "games/" + gameId + "/join", "", JSON.toJSONString(Player));
+        game = getGame();
+        players = getUsersInGame();
+        System.out.println("Succeed to join game! " + result);
     }
 
     private Game getGame() {
