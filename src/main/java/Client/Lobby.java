@@ -169,7 +169,7 @@ public class Lobby extends PApplet {
     private void joinGame(Game game, User Player, boolean isHost) {
         Clients client = new Clients();
         client.isHost = isHost;
-        client.game = game;
+        client.gameId = game.getId();
         client.Player = Player;
         Clients.main(args);
     }

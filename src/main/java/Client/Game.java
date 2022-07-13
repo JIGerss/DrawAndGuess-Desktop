@@ -6,13 +6,15 @@ public class Game {
     private Line[] lines;
     private String drawerName;
     private Message[] messages;
+    private boolean IsEnd;
 
-    public Game(String id, String answer, Line[] lines, String drawerName, Message[] messages) {
+    public Game(String id, String answer, Line[] lines, String drawerName, Message[] messages, boolean isEnd) {
         this.id = id;
         this.answer = answer;
         this.lines = lines;
         this.drawerName = drawerName;
         this.messages = messages;
+        IsEnd = isEnd;
     }
 
     public String getId() {
@@ -53,5 +55,13 @@ public class Game {
 
     public void setMessages(Message[] messages) {
         this.messages = messages;
+    }
+
+    public boolean isEnd() {
+        return IsEnd;
+    }
+
+    public void setEnd(boolean end) {
+        IsEnd = end;
     }
 }

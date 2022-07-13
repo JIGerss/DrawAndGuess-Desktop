@@ -11,7 +11,7 @@ import java.util.List;
 public class Clients extends PApplet {
     private final int WIDTH = 900, HEIGHT = 550;
     public boolean isHost = false;
-    public Game game;
+    public String gameId;
     public User Player;
     public User[] players;
 
@@ -22,7 +22,7 @@ public class Clients extends PApplet {
     public void setup() {
         stroke(20);
         size(WIDTH, HEIGHT);
-        HttpRequest.doPost("http://101.34.38.133:8090/games/" + game.getId() + "/join", "", "");
+        HttpRequest.doPost("http://101.34.38.133:8090/games/" + gameId + "/join", "", "");
         players = getUsersInGame();
     }
 
