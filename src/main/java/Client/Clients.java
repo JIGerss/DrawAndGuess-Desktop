@@ -1,6 +1,7 @@
 package Client;
 
 import java.security.MessageDigest;
+
 import com.alibaba.fastjson.*;
 import processing.core.*;
 
@@ -12,8 +13,8 @@ public class Clients extends PApplet {
     public static boolean isDrawer = false;
     public static String gameId;
     public static User Player;
-    private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
     private final int WIDTH = 900, HEIGHT = 550;
+    private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
     private int requestTime = 60;
     private String[] players;
     private Game game;
@@ -22,14 +23,13 @@ public class Clients extends PApplet {
         PApplet.main("Client.Clients");
     }
 
-    public static String convertMD5(String inStr){
+    private String convertMD5(String inStr) {
         char[] a = inStr.toCharArray();
-        for (int i = 0; i < a.length; i++){
+        for (int i = 0; i < a.length; i++) {
             a[i] = (char) (a[i] ^ 't');
         }
         String s = new String(a);
         return s;
-
     }
 
     public void setup() {

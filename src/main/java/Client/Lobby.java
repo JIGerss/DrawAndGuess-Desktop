@@ -9,9 +9,9 @@ import javax.swing.*;
 import java.util.List;
 
 public class Lobby extends PApplet {
-    private final String URL = "http://101.34.38.133:8090/";
     private final int WIDTH = 900, HEIGHT = 550;
     private final Room[] rooms = new Room[6];
+    private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
     private int gameNum = 0;
     private int requestTime = 60;
     private String[] users;
@@ -29,8 +29,8 @@ public class Lobby extends PApplet {
 
     public void setup() {
         size(WIDTH, HEIGHT);
+        URL = convertMD5(URL);
         boolean isSucceed = false;
-
         while (!isSucceed) {
             //Enter account
             String name = JOptionPane.showInputDialog(null, "输入用户名：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
@@ -207,6 +207,15 @@ public class Lobby extends PApplet {
         for (String s : list)
             GAMES[cur++] = JSON.parseObject(s, Game.class);
         return GAMES;
+    }
+
+    private String convertMD5(String inStr) {
+        char[] a = inStr.toCharArray();
+        for (int i = 0; i < a.length; i++) {
+            a[i] = (char) (a[i] ^ 't');
+        }
+        String s = new String(a);
+        return s;
     }
 
     private void exitLobby() {
