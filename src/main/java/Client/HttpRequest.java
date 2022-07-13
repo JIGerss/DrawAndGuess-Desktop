@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
+
     /**
      * 向指定URL发送GET方法的请求
      * <p>
