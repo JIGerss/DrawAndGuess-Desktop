@@ -23,7 +23,7 @@ public class Lobby extends PApplet {
         PApplet.main("Client.Lobby");
     }
 
-    public static String encryptToMD5(String str) {
+    private String encryptToMD5(String str) {
         return DigestUtils.md5Hex(str);
     }
 

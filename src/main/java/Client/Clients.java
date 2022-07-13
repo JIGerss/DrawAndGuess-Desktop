@@ -1,17 +1,20 @@
 package Client;
 
+import java.security.MessageDigest;
 import com.alibaba.fastjson.*;
 import processing.core.*;
 
+import javax.swing.*;
 import java.util.List;
 
 
 public class Clients extends PApplet {
-    private final String URL = "http://101.34.38.133:8090/";
-    private final int WIDTH = 900, HEIGHT = 550;
     public static boolean isDrawer = false;
     public static String gameId;
     public static User Player;
+    private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
+    private final int WIDTH = 900, HEIGHT = 550;
+    private int requestTime = 60;
     private String[] players;
     private Game game;
 
@@ -19,21 +22,51 @@ public class Clients extends PApplet {
         PApplet.main("Client.Clients");
     }
 
+    public static String convertMD5(String inStr){
+        char[] a = inStr.toCharArray();
+        for (int i = 0; i < a.length; i++){
+            a[i] = (char) (a[i] ^ 't');
+        }
+        String s = new String(a);
+        return s;
+
+    }
+
     public void setup() {
         stroke(20);
         size(WIDTH, HEIGHT);
-        if(!isDrawer) HttpRequest.doPost(URL + "games/" + gameId + "/join", "", "");
+        URL = convertMD5(URL);
+
+        if (!isDrawer) HttpRequest.doPost(URL + "games/" + gameId + "/join", "", "");
         game = getGame();
         players = getUsersInGame();
     }
 
     public void draw() {
+        if (requestTime == 60) {
+            requestTime = 0;
+            game = getGame();
+            players = getUsersInGame();
+        } else
+            requestTime++;
         background(253, 248, 229);
+    }
+
+    public void mousePressed() {
+        quitGame();
     }
 
     private Game getGame() {
         String json = HttpRequest.sendGet(URL + "games/" + gameId, "");
         return JSON.parseObject(json, Game.class);
+    }
+
+    private void quitGame() {
+
+        String userJson = JSON.toJSONString(Player);
+        String result = HttpRequest.doDelete(URL + "games/" + game.getId() + "/leave/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
+        System.out.println("Succeed to logout!" + result);
+
     }
 
     private String[] getUsersInGame() {
@@ -44,6 +77,19 @@ public class Clients extends PApplet {
         for (String s : list)
             USERNAMES[cur++] = s;
         return USERNAMES;
+    }
+
+    private void exitGame() {
+        try {
+            System.exit(0);
+        } catch (SecurityException securityException) {
+            System.out.println("Error!!");
+        }
+    }
+
+    private void error() {
+        JOptionPane.showMessageDialog(null, "错误！！", "你画我猜", JOptionPane.WARNING_MESSAGE);
+        exitGame();
     }
 
     public void settings() {
