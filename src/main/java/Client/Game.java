@@ -1,67 +1,57 @@
 package Client;
 
 public class Game {
-    private String Id;
-    private String Answer;
-    private Line[] Lines;
-    private User Drawer;
-    private Message[] Messages;
-    private boolean hasEnded;
+    private String id;
+    private String answer;
+    private Line[] lines;
+    private String drawerName;
+    private Message[] messages;
 
-    public Game(String id, String answer, Line[] lines, User drawer, Message[] messages, boolean hasEnded) {
-        Id = id;
-        Answer = answer;
-        Lines = lines;
-        Drawer = drawer;
-        Messages = messages;
-        this.hasEnded = hasEnded;
+    public Game(String id, String answer, Line[] lines, String drawerName, Message[] messages) {
+        this.id = id;
+        this.answer = answer;
+        this.lines = lines;
+        this.drawerName = drawerName;
+        this.messages = messages;
     }
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getAnswer() {
-        return Answer;
+        return answer;
     }
 
     public void setAnswer(String answer) {
-        Answer = answer;
-    }
-
-    public Message[] getMessages() {
-        return Messages;
-    }
-
-    public void setMessages(Message[] messages) {
-        Messages = messages;
+        this.answer = answer;
     }
 
     public Line[] getLines() {
-        return Lines;
+        return lines;
     }
 
     public void setLines(Line[] lines) {
-        Lines = lines;
+        this.lines = lines;
     }
 
-    public boolean isHasEnded() {
-        return hasEnded;
+    public String getDrawerName() {
+        return drawerName;
     }
 
-    public void setHasEnded(boolean hasEnded) {
-        this.hasEnded = hasEnded;
+    public void setDrawerName(String drawerName) {
+        this.drawerName = drawerName;
     }
 
-    public User getDrawer() {
-        return Drawer;
+    public Message[] getMessages() {
+        return messages;
     }
 
-    public void setDrawer(User drawer) {
-        Drawer = drawer;
+    public void setMessages(Message[] messages) {
+        this.messages = messages;
     }
 }

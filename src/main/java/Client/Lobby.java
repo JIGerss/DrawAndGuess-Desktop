@@ -1,5 +1,6 @@
 package Client;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import com.alibaba.fastjson.JSON;
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -29,34 +30,35 @@ public class Lobby extends PApplet {
             //Enter account
             String name = JOptionPane.showInputDialog(null, "输入用户名：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
             if (name == null || name.equals("")) exitLobby();
-            String RegTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/test", "", "");
+            String RegTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5("test"), "", "");
+            //TODO:tell user isRegister
             boolean isCorrect = false;
             while (!isCorrect) {
                 //Enter password
                 String psw;
                 if (RegTest != null) {
                     if (!RegTest.contains("already exists")) {
-                        psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
+                        psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜 -注册", JOptionPane.INFORMATION_MESSAGE);
                         if (psw == null) break;
                         if (psw.equals("")) continue;
-                        String register = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + psw, "", "");
-                        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + psw, "", "");
-                        System.out.println(login);
+                        HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5(psw), "", "");
+                        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
                         Player = JSON.parseObject(login, User.class);
                         isCorrect = true;
                         isSucceed = true;
                     } else {
-                        psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
+                        psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码：", "你画我猜 -登录", JOptionPane.INFORMATION_MESSAGE);
                         if (psw == null) break;
                         if (psw.equals("")) continue;
-                        String loginTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + psw, "", "");
+                        String loginTest = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
                         if(loginTest != null) {
                             if (loginTest.contains("password is incorrect")) {
-                                JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜 -密码错误", JOptionPane.WARNING_MESSAGE);
                             } else if (loginTest.contains("Already Exists")) {
-                                JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜 -账号已登录", JOptionPane.WARNING_MESSAGE);
                                 break;
                             }else{
+                                System.out.println(loginTest);
                                 Player = JSON.parseObject(loginTest, User.class);
                                 isCorrect = true;
                                 isSucceed = true;
@@ -70,7 +72,7 @@ public class Lobby extends PApplet {
         }
 
         users = getUsers();
-        //games = getGames();
+        games = getGames();
         setRooms();
         logout = new Button(700, 430, 150, 60);
         System.out.println("Succeed to login!Hello " + Player.getUserName());
@@ -86,7 +88,7 @@ public class Lobby extends PApplet {
         if (requestTime == 60) {
             requestTime = 0;
             users = getUsers();
-            //games = getGames();
+            games = getGames();
             setRooms();
         } else
             requestTime++;
@@ -189,7 +191,7 @@ public class Lobby extends PApplet {
         String[] USERS = new String[list.size()];
         int cur = 0;
         for (String s : list)
-            USERS[cur] = list.get(cur++);
+            USERS[cur++] = s;
         return USERS;
     }
 
@@ -209,6 +211,10 @@ public class Lobby extends PApplet {
         } catch (SecurityException securityException) {
             System.out.println("Error!!");
         }
+    }
+
+    public static String encryptToMD5(String str) {
+        return DigestUtils.md5Hex(str);
     }
 
     private void error() {
