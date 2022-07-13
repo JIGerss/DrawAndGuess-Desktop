@@ -10,17 +10,20 @@ import java.util.List;
 
 public class Lobby extends PApplet {
     private final int WIDTH = 900, HEIGHT = 550;
+    private final Room[] rooms = new Room[6];
     private int gameNum = 0;
     private int requestTime = 60;
-    private boolean host = false;
     private String[] users;
-    private Room[] rooms = new Room[6];
     private Button logout;
     private User Player;
     private Game[] games;
 
     public static void main(String[] args) {
         PApplet.main("Client.Lobby");
+    }
+
+    public static String encryptToMD5(String str) {
+        return DigestUtils.md5Hex(str);
     }
 
     public void setup() {
@@ -51,19 +54,19 @@ public class Lobby extends PApplet {
                         if (psw == null) break;
                         if (psw.equals("")) continue;
                         String loginTest = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
-                        if(loginTest != null) {
+                        if (loginTest != null) {
                             if (loginTest.contains("password is incorrect")) {
                                 JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜 -密码错误", JOptionPane.WARNING_MESSAGE);
                             } else if (loginTest.contains("Already Exists")) {
                                 JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜 -账号已登录", JOptionPane.WARNING_MESSAGE);
                                 break;
-                            }else{
+                            } else {
                                 System.out.println(loginTest);
                                 Player = JSON.parseObject(loginTest, User.class);
                                 isCorrect = true;
                                 isSucceed = true;
                             }
-                        }else
+                        } else
                             error();
                     }
                 } else
@@ -135,9 +138,9 @@ public class Lobby extends PApplet {
         for (Room room : rooms) {
             if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height) {
                 if (!room.isGame) {
-                    Game game = createNewGame();
+                    Game game = createGame();
                     if (game != null) {
-                        host = true;
+                        boolean host = true;
                         System.out.println("Set Answer to " + game.getAnswer());
                         joinGame(game, Player, host);
                         //TODO:Pause the Lobby
@@ -150,7 +153,7 @@ public class Lobby extends PApplet {
         }
     }
 
-    private Game createNewGame() {
+    private Game createGame() {
         String answer = JOptionPane.showInputDialog(null, "请设置房间题目：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
         if (answer == null) return null;
         String jsonStr = JSON.toJSONString(Player);
@@ -211,10 +214,6 @@ public class Lobby extends PApplet {
         } catch (SecurityException securityException) {
             System.out.println("Error!!");
         }
-    }
-
-    public static String encryptToMD5(String str) {
-        return DigestUtils.md5Hex(str);
     }
 
     private void error() {
