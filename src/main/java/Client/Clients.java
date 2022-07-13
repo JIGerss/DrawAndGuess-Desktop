@@ -1,9 +1,11 @@
 package Client;
 
 import com.alibaba.fastjson.*;
+import processing.awt.PSurfaceAWT;
 import processing.core.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 
@@ -13,6 +15,7 @@ public class Clients extends PApplet {
     public static User Player;
     private final int WIDTH = 900, HEIGHT = 550;
     private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
+    private boolean isVisible = true;
     private int requestTime = 60;
     private String[] players;
     private Game game;
@@ -33,22 +36,30 @@ public class Clients extends PApplet {
         stroke(20);
         size(WIDTH, HEIGHT);
         URL = convertMD5(URL);
-        if (!isDrawer) HttpRequest.doPost(URL + "games/" + gameId + "/join", "", "");
+        if (!isDrawer) HttpRequest.doPost(URL + "games/" + gameId + "/join", "", JSON.toJSONString(Player));
         game = getGame();
         players = getUsersInGame();
     }
 
     public void draw() {
-        if (requestTime == 60) {
-            requestTime = 0;
-            game = getGame();
-            players = getUsersInGame();
-        } else
-            requestTime++;
-        background(253, 248, 229);
+        if (Lobby.isGaming && !isVisible) {
+            Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+            frame.setVisible(true);
+            isVisible = true;
+        } else {
+            if (requestTime == 60) {
+                requestTime = 0;
+                game = getGame();
+                players = getUsersInGame();
+            } else
+                requestTime++;
+
+            background(253, 248, 229);
+        }
     }
 
     public void mousePressed() {
+
         quitGame();
     }
 
@@ -61,7 +72,10 @@ public class Clients extends PApplet {
         String userJson = JSON.toJSONString(Player);
         String result = HttpRequest.doDelete(URL + "games/" + game.getId() + "/leave/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
         System.out.println("Succeed to quit game!" + result);
-        exitGame();
+        Lobby.isGaming = false;
+        isVisible = false;
+        Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+        frame.setVisible(false);
     }
 
     private String[] getUsersInGame() {
@@ -74,12 +88,10 @@ public class Clients extends PApplet {
         return USERNAMES;
     }
 
-    private void exitGame() {
-        try {
-            System.exit(0);
-        } catch (SecurityException securityException) {
-            System.out.println("Error!!");
-        }
+    private void logout() {
+        String userJson = JSON.toJSONString(Player);
+        String result = HttpRequest.doDelete(URL + "users/logout/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
+        System.out.println("Succeed to logout!" + result);
     }
 
     private void error() {
@@ -87,9 +99,22 @@ public class Clients extends PApplet {
         exitGame();
     }
 
+    private void exitGame() {
+        try {
+            System.exit(0);
+        } catch (Exception e) {
+            System.out.println("Error!");
+        }
+    }
+
     public void settings() {
         size(WIDTH, HEIGHT);
     }
+
+    public void closeApplication() {
+        exit();
+    }
+
 }
 
 

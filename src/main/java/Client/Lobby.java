@@ -2,17 +2,20 @@ package Client;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import com.alibaba.fastjson.JSON;
+import processing.awt.PSurfaceAWT;
 import processing.core.PApplet;
 import processing.core.PFont;
 
 import javax.swing.*;
-import java.util.ArrayList;
+import java.awt.*;
 import java.util.List;
 
 public class Lobby extends PApplet {
+    public static boolean isGaming = false;
     private final int WIDTH = 900, HEIGHT = 550;
     private final Room[] rooms = new Room[6];
     private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
+    private boolean isVisible = true;
     private int gameNum = 0;
     private int requestTime = 60;
     private String[] users;
@@ -72,10 +75,6 @@ public class Lobby extends PApplet {
                 }
             }
         }
-
-//        String login = HttpRequest.doPost(URL +"users/login/" + "v" + "/" + encryptToMD5("test"), "", "");
-//        Player = JSON.parseObject(login, User.class);
-
         users = getUsers();
         games = getGames();
         setRooms();
@@ -90,70 +89,75 @@ public class Lobby extends PApplet {
     }
 
     public void draw() {
-        if (requestTime == 60) {
-            requestTime = 0;
+        if (!isVisible && !isGaming) {
+            Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+            frame.setVisible(true);
+            isVisible = true;
+        } else {
+            if (requestTime == 60) {
+                requestTime = 0;
+                users = getUsers();
+                games = getGames();
+                setRooms();
+            } else
+                requestTime++;
+
+
+            background(253, 248, 229);
+            textSize(30);
+            fill(130, 130, 130);
+            text("在线用户(" + users.length + ")：", (float) (WIDTH / 1.3), (float) (HEIGHT / 10));
+            text("点击房间进入游戏：", 30, 50);
+            textSize(25);
+            for (int i = 0; i < users.length; i++) {
+                if (i >= 7) {
+                    text("···", (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
+                    break;
+                }
+                text(users[i], (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
+            }
+            for (Room room : rooms) {
+                if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height)
+                    fill(190, 163, 162);
+                else {
+                    if (!room.isGame)
+                        fill(230, 198, 26);
+                    else
+                        fill(255, 198, 180);
+                }
+                rect(room.button.x, room.button.y, room.button.width, room.button.height, 50);
+                fill(130, 130, 130);
+                text(room.numberOfPlayer, room.button.x + 45, room.button.y + 56);
+            }
+            if (mouseX > logout.x && mouseX < logout.x + logout.width && mouseY > logout.y && mouseY < logout.y + logout.height)
+                fill(190, 163, 162);
+            else
+                fill(170, 163, 162);
+            rect(logout.x, logout.y, logout.width, logout.height, 2);
+            fill(253, 248, 229);
+            text("登出游戏", logout.x + 27, logout.y + 40);
+        }
+
+        public void mousePressed () {
             users = getUsers();
             games = getGames();
             setRooms();
-        } else
-            requestTime++;
-        background(253, 248, 229);
-        textSize(30);
-        fill(130, 130, 130);
-        text("在线用户(" + users.length + ")：", (float) (WIDTH / 1.3), (float) (HEIGHT / 10));
-        text("点击房间进入游戏：", 30, 50);
-        textSize(25);
-        for (int i = 0; i < users.length; i++) {
-            if (i >= 7) {
-                text("···", (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
-                break;
+            if (mouseX > logout.x && mouseX < logout.x + logout.width && mouseY > logout.y && mouseY < logout.y + logout.height) {
+                logout();
+                exitLobby();
             }
-            text(users[i], (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
-        }
-        for (Room room : rooms) {
-            if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height)
-                fill(190, 163, 162);
-            else {
-                if (!room.isGame)
-                    fill(230, 198, 26);
-                else
-                    fill(255, 198, 180);
-            }
-            rect(room.button.x, room.button.y, room.button.width, room.button.height, 50);
-            fill(130, 130, 130);
-            text(room.numberOfPlayer, room.button.x + 45, room.button.y + 56);
-        }
-        if (mouseX > logout.x && mouseX < logout.x + logout.width && mouseY > logout.y && mouseY < logout.y + logout.height)
-            fill(190, 163, 162);
-        else
-            fill(170, 163, 162);
-        rect(logout.x, logout.y, logout.width, logout.height, 2);
-        fill(253, 248, 229);
-        text("登出游戏", logout.x + 27, logout.y + 40);
-    }
-
-    public void mousePressed() {
-        users = getUsers();
-        games = getGames();
-        setRooms();
-        if (mouseX > logout.x && mouseX < logout.x + logout.width && mouseY > logout.y && mouseY < logout.y + logout.height) {
-            logout();
-            exitLobby();
-        }
-        for (Room room : rooms) {
-            if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height) {
-                if (!room.isGame) {
-                    Game game = createGame();
-                    System.out.println(JSON.toJSONString(game));
-                    if (game != null) {
-                        boolean host = true;
-                        System.out.println("Set Answer to " + game.getAnswer());
-                        joinGame(game, Player, host);
-                        //TODO:Pause the Lobby
+            for (Room room : rooms) {
+                if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height) {
+                    if (!room.isGame) {
+                        Game game = createGame();
+                        System.out.println(JSON.toJSONString(game));
+                        if (game != null) {
+                            System.out.println("Set Answer to " + game.getAnswer());
+                            joinGame(game, Player, true);
+                        }
+                    } else {
+                        joinGame(room.game, Player, false);
                     }
-                } else {
-                    joinGame(room.game, Player, false);
-                    //TODO:Pause the Lobby
                 }
             }
         }
@@ -168,6 +172,10 @@ public class Lobby extends PApplet {
     }
 
     private void joinGame(Game game, User Player, boolean isHost) {
+        isGaming = true;
+        isVisible = false;
+        Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+        frame.setVisible(false);
         Clients.isDrawer = isHost;
         Clients.gameId = game.getId();
         Clients.Player = Player;
@@ -181,6 +189,7 @@ public class Lobby extends PApplet {
                 String json = HttpRequest.sendGet(URL + "games/" + games[i].getId() + "/players", "");
                 List<String> list = JSON.parseArray(json, String.class);
                 rooms[i].numberOfPlayer = list.size();
+                rooms[i].isGame = true;
             } else {
                 rooms[i] = new Room(new Button(150 + (i % 2) * 250, 85 + (i / 2) * 150, 100, 100));
             }
