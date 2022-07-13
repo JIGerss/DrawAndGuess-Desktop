@@ -130,11 +130,15 @@ public class Lobby extends PApplet {
         }
         for (int i = 0; i < users.length; i++) {
             if (i >= 5) {
-                text("···", 670, 130 + i * 40);
+                text("···········", 670, 130 + i * 40);
                 break;
             }
-            if (!users[i].equals(Player.getUserName()))
-                text(users[i], 670, 130 + i * 40);
+            if (!users[i].equals(Player.getUserName())) {
+                String name = users[i];
+                if (name.length() > 16)
+                    name = name.substring(0, 13) + "...";
+                text(name, 670, 130 + i * 40);
+            }
         }
         for (Room room : rooms) {
             if (isMovedOnButton(room.button))
@@ -150,9 +154,9 @@ public class Lobby extends PApplet {
             text(room.numberOfPlayer, room.button.x + 40, room.button.y + 59);
             if (room.isGame) {
                 String name = room.game.getDrawerName();
-                if (name.length() > 10)
-                    name = name.substring(0, 7) + "...";
-                while (name.length() < 10)
+                if (name.length() > 8)
+                    name = name.substring(0, 5) + "...";
+                while (name.length() < 8)
                     name = " " + name;
                 text(name, room.button.x - 100, room.button.y + 59);
             } else
