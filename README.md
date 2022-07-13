@@ -1,2 +1,3 @@
-# DrawAndGuess_Client
-A Java Client of Draw and Guess
+# DrawAndGuess Client
+
+[原项目](https://github.com/uniqueFranky/DrawAndGuess)
