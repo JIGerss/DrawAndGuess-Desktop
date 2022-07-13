@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import processing.awt.PSurfaceAWT;
 import processing.core.PApplet;
 import processing.core.PFont;
+import processing.core.PImage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +24,7 @@ public class Lobby extends PApplet {
     private Button logout;
     private User Player;
     private Game[] games;
+    PImage logoutButton;
 
     public static void main(String[] args) {
         PApplet.main("Client.Lobby");
@@ -78,8 +80,10 @@ public class Lobby extends PApplet {
             }
         }
         setVariables();
-        logout = new Button(700, 430, 150, 60);
+        logout = new Button(680, 430, 200, 50);
         System.out.println("Succeed to login!Hello " + Player.getUserName() + " " + Player.getUserId());
+        logoutButton = loadImage("logout.png");
+        logoutButton.resize(logout.width, logout.height);
         PFont myFont = createFont("SIMHEI", 30);
         textFont(myFont);
         noStroke();
@@ -89,7 +93,7 @@ public class Lobby extends PApplet {
 
     public void draw() {
         if (!isVisible && !isGaming) {
-            Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+            Frame frame = ((PSurfaceAWT.SmoothCanvas) surface.getNative()).getFrame();
             frame.setVisible(true);
             isVisible = true;
             setVariables();
@@ -102,7 +106,11 @@ public class Lobby extends PApplet {
             requestTime++;
         background(253, 248, 229);
         textSize(30);
-        rect(750, -20, 300, 700);
+        fill(253, 248, 120);
+        rect(640, -20, 300, 700);
+        fill(253, 248, 150);
+        rect(650, -20, 300, 700);
+
         fill(130, 130, 130);
         text("在线用户(" + users.length + ")：", (float) (WIDTH / 1.3), (float) (HEIGHT / 10));
         text("点击房间进入游戏：", 30, 50);
@@ -133,10 +141,9 @@ public class Lobby extends PApplet {
             fill(190, 163, 162);
         else
             fill(170, 163, 162);
-        rect(logout.x, logout.y, logout.width, logout.height, 2);
-        fill(253, 248, 229);
-        text("登出游戏", logout.x + 27, logout.y + 40);
-
+        image(logoutButton, logout.x, logout.y);
+        fill(130, 130, 130);
+        text("登出游戏", logout.x + 45, logout.y + 34);
     }
 
     public void mousePressed() {
@@ -185,7 +192,7 @@ public class Lobby extends PApplet {
     private void joinGame(Game game, User Player, boolean isHost) {
         isGaming = true;
         isVisible = false;
-        Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+        Frame frame = ((PSurfaceAWT.SmoothCanvas) surface.getNative()).getFrame();
         frame.setVisible(false);
         Clients.isDrawer = isHost;
         Clients.gameId = game.getId();
