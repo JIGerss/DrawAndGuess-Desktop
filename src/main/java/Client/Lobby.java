@@ -102,16 +102,19 @@ public class Lobby extends PApplet {
             requestTime++;
         background(253, 248, 229);
         textSize(30);
+        rect(750, -20, 300, 700);
         fill(130, 130, 130);
         text("在线用户(" + users.length + ")：", (float) (WIDTH / 1.3), (float) (HEIGHT / 10));
         text("点击房间进入游戏：", 30, 50);
+        text(Player.getUserName(), (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30));
         textSize(25);
         for (int i = 0; i < users.length; i++) {
             if (i >= 7) {
                 text("···", (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
                 break;
             }
-            text(users[i], (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
+            if(!users[i].equals(Player.getUserName()))
+                text(users[i], (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 70 + 30 * i));
         }
         for (Room room : rooms) {
             if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height)
