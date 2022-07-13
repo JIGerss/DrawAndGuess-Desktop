@@ -1,7 +1,5 @@
 package Client;
 
-import java.security.MessageDigest;
-
 import com.alibaba.fastjson.*;
 import processing.core.*;
 
@@ -28,15 +26,13 @@ public class Clients extends PApplet {
         for (int i = 0; i < a.length; i++) {
             a[i] = (char) (a[i] ^ 't');
         }
-        String s = new String(a);
-        return s;
+        return new String(a);
     }
 
     public void setup() {
         stroke(20);
         size(WIDTH, HEIGHT);
         URL = convertMD5(URL);
-
         if (!isDrawer) HttpRequest.doPost(URL + "games/" + gameId + "/join", "", "");
         game = getGame();
         players = getUsersInGame();
@@ -62,11 +58,10 @@ public class Clients extends PApplet {
     }
 
     private void quitGame() {
-
         String userJson = JSON.toJSONString(Player);
         String result = HttpRequest.doDelete(URL + "games/" + game.getId() + "/leave/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
-        System.out.println("Succeed to logout!" + result);
-
+        System.out.println("Succeed to quit game!" + result);
+        exitGame();
     }
 
     private String[] getUsersInGame() {

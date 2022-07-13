@@ -6,6 +6,7 @@ import processing.core.PApplet;
 import processing.core.PFont;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Lobby extends PApplet {
@@ -132,6 +133,9 @@ public class Lobby extends PApplet {
     }
 
     public void mousePressed() {
+        users = getUsers();
+        games = getGames();
+        setRooms();
         if (mouseX > logout.x && mouseX < logout.x + logout.width && mouseY > logout.y && mouseY < logout.y + logout.height) {
             logout();
             exitLobby();
@@ -202,10 +206,15 @@ public class Lobby extends PApplet {
     private Game[] getGames() {
         String json = HttpRequest.sendGet(URL + "games", "");
         List<String> list = JSON.parseArray(json, String.class);
-        Game[] GAMES = new Game[list.size()];
-        int cur = 0;
+        int size = 0;
         for (String s : list)
-            GAMES[cur++] = JSON.parseObject(s, Game.class);
+            if (!JSON.parseObject(s, Game.class).isEnd()) size++;
+        Game[] GAMES = new Game[size];
+        int cur = 0;
+        for (String s : list) {
+            Game temp = JSON.parseObject(s, Game.class);
+            if (!temp.isEnd()) GAMES[cur++] = temp;
+        }
         return GAMES;
     }
 
@@ -214,8 +223,7 @@ public class Lobby extends PApplet {
         for (int i = 0; i < a.length; i++) {
             a[i] = (char) (a[i] ^ 't');
         }
-        String s = new String(a);
-        return s;
+        return new String(a);
     }
 
     private void exitLobby() {
