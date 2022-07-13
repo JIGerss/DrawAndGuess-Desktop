@@ -8,7 +8,6 @@ import processing.core.PFont;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 
 public class Lobby extends PApplet {
@@ -263,6 +262,5 @@ public class Lobby extends PApplet {
     public void settings() {
         size(WIDTH, HEIGHT);
     }
-
 
 }

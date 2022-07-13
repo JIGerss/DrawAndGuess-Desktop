@@ -11,6 +11,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.*;
+import javax.swing.*;
+import javax.swing.JOptionPane.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
@@ -52,6 +54,7 @@ public class HttpRequest {
         } catch (Exception e) {
             System.out.println("发送GET请求出现异常！" + e);
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "错误！！", "你画我猜", JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
         // 使用finally块来关闭输入流
