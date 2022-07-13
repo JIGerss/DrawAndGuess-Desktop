@@ -122,19 +122,19 @@ public class Lobby extends PApplet {
         fill(24, 25, 28);
         textSize(25);
         text("点击房间进入游戏：", 30, 50);
-        text(Player.getUserName(), 660, 80);
+        text(Player.getUserName(), 670, 90);
 
-        stroke(227,229,231);
-        for (int i = 0; i < 9; i++) {
-            line(650, 80, 850, 80);
+        stroke(200, 200, 200);
+        for (int i = 0; i < 7; i++) {
+            line(660, 100 + i * 40, 865, 100 + i * 40);
         }
         for (int i = 0; i < users.length; i++) {
-            if (i >= 7) {
-                text("···", (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
+            if (i >= 5) {
+                text("···", 670, 130 + i * 40);
                 break;
             }
             if (!users[i].equals(Player.getUserName()))
-                text(users[i], (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 70 + 30 * i));
+                text(users[i], 670, 130 + i * 40);
         }
         for (Room room : rooms) {
             if (isMovedOnButton(room.button))
@@ -143,11 +143,20 @@ public class Lobby extends PApplet {
                 if (!room.isGame)
                     fill(230, 198, 26);
                 else
-                    fill(255, 198, 180);
+                    fill(255, 198, 26);
             }
             rect(room.button.x, room.button.y, room.button.width, room.button.height, 50);
             fill(24, 25, 28);
-            text(room.numberOfPlayer, room.button.x + 45, room.button.y + 56);
+            text(room.numberOfPlayer, room.button.x + 40, room.button.y + 59);
+            if (room.isGame) {
+                String name = room.game.getDrawerName();
+                if (name.length() > 10)
+                    name = name.substring(0, 7) + "...";
+                while (name.length() < 10)
+                    name = " " + name;
+                text(name, room.button.x - 100, room.button.y + 59);
+            } else
+                text("        空", room.button.x - 100, room.button.y + 59);
         }
         if (isMovedOnButton(logout))
             fill(190, 163, 162);
@@ -158,7 +167,7 @@ public class Lobby extends PApplet {
         textSize(25);
         fill(24, 25, 28);
         text("登出游戏", logout.x + 45, logout.y + 34);
-        if(isOnButton) cursor(HAND);
+        if (isOnButton) cursor(HAND);
         else cursor(ARROW);
     }
 
@@ -184,9 +193,8 @@ public class Lobby extends PApplet {
         }
     }
 
-
     private boolean isMovedOnButton(Button button) {
-        if(mouseX > button.x && mouseX < button.x + button.width && mouseY > button.y && mouseY < button.y + button.height){
+        if (mouseX > button.x && mouseX < button.x + button.width && mouseY > button.y && mouseY < button.y + button.height) {
             isOnButton = true;
             return true;
         }
@@ -228,7 +236,7 @@ public class Lobby extends PApplet {
         }
     }
 
-    private String[] getRandomAnswers(){
+    private String[] getRandomAnswers() {
         String[] VOCABS = new String[CHOICES];
         Random random = new Random(System.currentTimeMillis());
         int MAX = vocabs.length - 1, MIN = 0, cur = 0;
@@ -239,17 +247,16 @@ public class Lobby extends PApplet {
         return VOCABS;
     }
 
-
     private void setRooms() {
         for (int i = 0; i < rooms.length; i++) {
             if (gameNum > i) {
-                rooms[i] = new Room(new Button(150 + (i % 2) * 250, 85 + (i / 2) * 150, 100, 100), games[i]);
+                rooms[i] = new Room(new Button(130 + (i % 2) * 300, 85 + (i / 2) * 150, 100, 100), games[i]);
                 String json = HttpRequest.sendGet(URL + "games/" + games[i].getId() + "/players", "");
                 List<String> list = JSON.parseArray(json, String.class);
                 rooms[i].numberOfPlayer = list.size();
                 rooms[i].isGame = true;
             } else {
-                rooms[i] = new Room(new Button(150 + (i % 2) * 250, 85 + (i / 2) * 150, 100, 100));
+                rooms[i] = new Room(new Button(130 + (i % 2) * 300, 85 + (i / 2) * 150, 100, 100));
             }
         }
     }
@@ -285,7 +292,7 @@ public class Lobby extends PApplet {
         return GAMES;
     }
 
-    private String[] getVocabs(){
+    private String[] getVocabs() {
         String json = HttpRequest.sendGet(URL + "vocabs", "");
         List<String> list = JSON.parseArray(json, String.class);
         String[] VOCABS = new String[list.size()];
