@@ -10,10 +10,11 @@ import processing.core.PImage;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.Random;
 
 public class Lobby extends PApplet {
     public static boolean isGaming = false;
-    private final int WIDTH = 900, HEIGHT = 550;
+    private final int WIDTH = 900, HEIGHT = 550, CHOICES = 5;
     private final Room[] rooms = new Room[6];
     PImage logoutButton;
     private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
@@ -22,6 +23,7 @@ public class Lobby extends PApplet {
     private boolean hasStartAGame = false;
     private int gameNum = 0;
     private int requestTime = 60;
+    private String[] vocabs;
     private String[] users;
     private Button logout;
     private User Player;
@@ -81,13 +83,13 @@ public class Lobby extends PApplet {
             }
         }
         setVariables();
+        vocabs = getVocabs();
         logout = new Button(665, 430, 200, 50);
         System.out.println("Succeed to login!Hello " + Player.getUserName() + " " + Player.getUserId());
         logoutButton = loadImage("logout.png");
         logoutButton.resize(logout.width, logout.height);
         PFont myFont = createFont("DengXian", 32);
         textFont(myFont);
-        noStroke();
         strokeWeight(2);
         frameRate = 60;
     }
@@ -105,6 +107,7 @@ public class Lobby extends PApplet {
             setVariables();
         } else
             requestTime++;
+        isOnButton = false;
         background(253, 248, 200);
         textSize(30);
         fill(241, 242, 243);
@@ -119,8 +122,12 @@ public class Lobby extends PApplet {
         fill(24, 25, 28);
         textSize(25);
         text("点击房间进入游戏：", 30, 50);
-        text(Player.getUserName(), (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30));
-        textSize(25);
+        text(Player.getUserName(), 660, 80);
+
+        stroke(227,229,231);
+        for (int i = 0; i < 9; i++) {
+            line(650, 80, 850, 80);
+        }
         for (int i = 0; i < users.length; i++) {
             if (i >= 7) {
                 text("···", (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
@@ -130,7 +137,7 @@ public class Lobby extends PApplet {
                 text(users[i], (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 70 + 30 * i));
         }
         for (Room room : rooms) {
-            if (isMovedOnButton(room))
+            if (isMovedOnButton(room.button))
                 fill(190, 163, 162);
             else {
                 if (!room.isGame)
@@ -148,8 +155,11 @@ public class Lobby extends PApplet {
             fill(170, 163, 162);
 
         image(logoutButton, logout.x, logout.y);
+        textSize(25);
         fill(24, 25, 28);
         text("登出游戏", logout.x + 45, logout.y + 34);
+        if(isOnButton) cursor(HAND);
+        else cursor(ARROW);
     }
 
     public void mousePressed() {
@@ -159,7 +169,7 @@ public class Lobby extends PApplet {
             exitLobby();
         }
         for (Room room : rooms) {
-            if (isMovedOnButton(room)) {
+            if (isMovedOnButton(room.button)) {
                 if (!room.isGame) {
                     Game game = createGame();
                     System.out.println(JSON.toJSONString(game));
@@ -174,24 +184,13 @@ public class Lobby extends PApplet {
         }
     }
 
-    private boolean isMovedOnButton(Room room) {
-        if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height) {
-            cursor(HAND);
-            return true;
-        } else {
-            cursor(ARROW);
-            return false;
-        }
-    }
 
     private boolean isMovedOnButton(Button button) {
-        if (mouseX > button.x && mouseX < button.x + button.width && mouseY > button.y && mouseY < button.y + button.height) {
-            cursor(HAND);
+        if(mouseX > button.x && mouseX < button.x + button.width && mouseY > button.y && mouseY < button.y + button.height){
+            isOnButton = true;
             return true;
-        } else {
-            cursor(ARROW);
-            return false;
         }
+        return false;
     }
 
     private void setVariables() {
@@ -203,7 +202,8 @@ public class Lobby extends PApplet {
 
     private Game createGame() {
         try {
-            String answer = JOptionPane.showInputDialog(null, "请设置房间题目：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
+            String[] choices = getRandomAnswers();
+            String answer = (String) JOptionPane.showInputDialog(null, "请选择房间题目：", "你画我猜 -选择题目", JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
             if (answer == null) return null;
             String jsonStr = JSON.toJSONString(Player);
             String result = HttpRequest.doPost(URL + "games/create/" + answer, "", jsonStr);
@@ -227,6 +227,18 @@ public class Lobby extends PApplet {
             Clients.main(args);
         }
     }
+
+    private String[] getRandomAnswers(){
+        String[] VOCABS = new String[CHOICES];
+        Random random = new Random(System.currentTimeMillis());
+        int MAX = vocabs.length - 1, MIN = 0, cur = 0;
+        for (int i = 0; i < CHOICES; i++) {
+            int number = random.nextInt(MAX - MIN + 1) + MIN;
+            VOCABS[cur++] = vocabs[number];
+        }
+        return VOCABS;
+    }
+
 
     private void setRooms() {
         for (int i = 0; i < rooms.length; i++) {
@@ -271,6 +283,16 @@ public class Lobby extends PApplet {
             if (!temp.isEnd()) GAMES[cur++] = temp;
         }
         return GAMES;
+    }
+
+    private String[] getVocabs(){
+        String json = HttpRequest.sendGet(URL + "vocabs", "");
+        List<String> list = JSON.parseArray(json, String.class);
+        String[] VOCABS = new String[list.size()];
+        int cur = 0;
+        for (String s : list)
+            VOCABS[cur++] = s;
+        return VOCABS;
     }
 
     private String convertMD5(String inStr) {
