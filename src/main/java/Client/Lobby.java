@@ -29,50 +29,54 @@ public class Lobby extends PApplet {
     public void setup() {
         size(WIDTH, HEIGHT);
         boolean isSucceed = false;
-        while (!isSucceed) {
-            //Enter account
-            String name = JOptionPane.showInputDialog(null, "输入用户名：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
-            if (name == null || name.equals("")) exitLobby();
-            String RegTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5("test"), "", "");
-            //TODO:tell user isRegister
-            boolean isCorrect = false;
-            while (!isCorrect) {
-                //Enter password
-                String psw;
-                if (RegTest != null) {
-                    if (!RegTest.contains("already exists")) {
-                        psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜 -注册", JOptionPane.INFORMATION_MESSAGE);
-                        if (psw == null) break;
-                        if (psw.equals("")) continue;
-                        HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5(psw), "", "");
-                        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
-                        Player = JSON.parseObject(login, User.class);
-                        isCorrect = true;
-                        isSucceed = true;
-                    } else {
-                        psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码：", "你画我猜 -登录", JOptionPane.INFORMATION_MESSAGE);
-                        if (psw == null) break;
-                        if (psw.equals("")) continue;
-                        String loginTest = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
-                        if (loginTest != null) {
-                            if (loginTest.contains("password is incorrect")) {
-                                JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜 -密码错误", JOptionPane.WARNING_MESSAGE);
-                            } else if (loginTest.contains("Already Exists")) {
-                                JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜 -账号已登录", JOptionPane.WARNING_MESSAGE);
-                                break;
-                            } else {
-                                System.out.println(loginTest);
-                                Player = JSON.parseObject(loginTest, User.class);
-                                isCorrect = true;
-                                isSucceed = true;
-                            }
-                        } else
-                            error();
-                    }
-                } else
-                    error();
-            }
-        }
+
+//        while (!isSucceed) {
+//            //Enter account
+//            String name = JOptionPane.showInputDialog(null, "输入用户名：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
+//            if (name == null || name.equals("")) exitLobby();
+//            String RegTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5("test"), "", "");
+//            //TODO:tell user isRegister
+//            boolean isCorrect = false;
+//            while (!isCorrect) {
+//                //Enter password
+//                String psw;
+//                if (RegTest != null) {
+//                    if (!RegTest.contains("already exists")) {
+//                        psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜 -注册", JOptionPane.INFORMATION_MESSAGE);
+//                        if (psw == null) break;
+//                        if (psw.equals("")) continue;
+//                        HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5(psw), "", "");
+//                        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
+//                        Player = JSON.parseObject(login, User.class);
+//                        isCorrect = true;
+//                        isSucceed = true;
+//                    } else {
+//                        psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码：", "你画我猜 -登录", JOptionPane.INFORMATION_MESSAGE);
+//                        if (psw == null) break;
+//                        if (psw.equals("")) continue;
+//                        String loginTest = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
+//                        if (loginTest != null) {
+//                            if (loginTest.contains("password is incorrect")) {
+//                                JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜 -密码错误", JOptionPane.WARNING_MESSAGE);
+//                            } else if (loginTest.contains("Already Exists")) {
+//                                JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜 -账号已登录", JOptionPane.WARNING_MESSAGE);
+//                                break;
+//                            } else {
+//                                System.out.println(loginTest);
+//                                Player = JSON.parseObject(loginTest, User.class);
+//                                isCorrect = true;
+//                                isSucceed = true;
+//                            }
+//                        } else
+//                            error();
+//                    }
+//                } else
+//                    error();
+//            }
+//        }
+
+        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + "v" + "/" + encryptToMD5("test"), "", "");
+        Player = JSON.parseObject(login, User.class);
 
         users = getUsers();
         games = getGames();
@@ -139,6 +143,7 @@ public class Lobby extends PApplet {
             if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height) {
                 if (!room.isGame) {
                     Game game = createGame();
+                    System.out.println(JSON.toJSONString(game));
                     if (game != null) {
                         boolean host = true;
                         System.out.println("Set Answer to " + game.getAnswer());
