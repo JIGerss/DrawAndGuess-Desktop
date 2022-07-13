@@ -39,8 +39,9 @@ public class Lobby extends PApplet {
                         psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
                         if (psw == null) break;
                         if (psw.equals("")) continue;
-                        HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + psw, "", "");
+                        String register = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + psw, "", "");
                         String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + psw, "", "");
+                        System.out.println(login);
                         Player = JSON.parseObject(login, User.class);
                         isCorrect = true;
                         isSucceed = true;
