@@ -9,9 +9,9 @@ import java.util.List;
 public class Clients extends PApplet {
     private final String URL = "http://101.34.38.133:8090/";
     private final int WIDTH = 900, HEIGHT = 550;
-    public boolean isDrawer = false;
-    public String gameId;
-    public User Player;
+    public static boolean isDrawer = false;
+    public static String gameId;
+    public static User Player;
     private String[] players;
     private Game game;
 
@@ -22,7 +22,7 @@ public class Clients extends PApplet {
     public void setup() {
         stroke(20);
         size(WIDTH, HEIGHT);
-        HttpRequest.doPost(URL + "games/" + gameId + "/join", "", "");
+        if(!isDrawer) HttpRequest.doPost(URL + "games/" + gameId + "/join", "", "");
         game = getGame();
         players = getUsersInGame();
     }

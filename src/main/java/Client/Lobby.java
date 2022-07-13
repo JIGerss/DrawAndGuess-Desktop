@@ -79,7 +79,7 @@ public class Lobby extends PApplet {
         games = getGames();
         setRooms();
         logout = new Button(700, 430, 150, 60);
-        System.out.println("Succeed to login!Hello " + Player.getUserName());
+        System.out.println("Succeed to login!Hello " + Player.getUserName() + " " + Player.getUserId());
         if (games != null) gameNum = games.length;
         PFont myFont = createFont("SIMHEI", 30);
         textFont(myFont);
@@ -164,10 +164,9 @@ public class Lobby extends PApplet {
     }
 
     private void joinGame(Game game, User Player, boolean isHost) {
-        Clients client = new Clients();
-        client.isDrawer = isHost;
-        client.gameId = game.getId();
-        client.Player = Player;
+        Clients.isDrawer = isHost;
+        Clients.gameId = game.getId();
+        Clients.Player = Player;
         Clients.main(args);
     }
 
