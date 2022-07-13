@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.util.List;
 
 public class Lobby extends PApplet {
+    private final String URL = "http://101.34.38.133:8090/";
     private final int WIDTH = 900, HEIGHT = 550;
     private final Room[] rooms = new Room[6];
     private int gameNum = 0;
@@ -30,53 +31,49 @@ public class Lobby extends PApplet {
         size(WIDTH, HEIGHT);
         boolean isSucceed = false;
 
-//        while (!isSucceed) {
-//            //Enter account
-//            String name = JOptionPane.showInputDialog(null, "输入用户名：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
-//            if (name == null || name.equals("")) exitLobby();
-//            String RegTest = HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5("test"), "", "");
-//            //TODO:tell user isRegister
-//            boolean isCorrect = false;
-//            while (!isCorrect) {
-//                //Enter password
-//                String psw;
-//                if (RegTest != null) {
-//                    if (!RegTest.contains("already exists")) {
-//                        psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜 -注册", JOptionPane.INFORMATION_MESSAGE);
-//                        if (psw == null) break;
-//                        if (psw.equals("")) continue;
-//                        HttpRequest.doPost("http://101.34.38.133:8090/users/reg/" + name + "/" + encryptToMD5(psw), "", "");
-//                        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
-//                        Player = JSON.parseObject(login, User.class);
-//                        isCorrect = true;
-//                        isSucceed = true;
-//                    } else {
-//                        psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码：", "你画我猜 -登录", JOptionPane.INFORMATION_MESSAGE);
-//                        if (psw == null) break;
-//                        if (psw.equals("")) continue;
-//                        String loginTest = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + name + "/" + encryptToMD5(psw), "", "");
-//                        if (loginTest != null) {
-//                            if (loginTest.contains("password is incorrect")) {
-//                                JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜 -密码错误", JOptionPane.WARNING_MESSAGE);
-//                            } else if (loginTest.contains("Already Exists")) {
-//                                JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜 -账号已登录", JOptionPane.WARNING_MESSAGE);
-//                                break;
-//                            } else {
-//                                System.out.println(loginTest);
-//                                Player = JSON.parseObject(loginTest, User.class);
-//                                isCorrect = true;
-//                                isSucceed = true;
-//                            }
-//                        } else
-//                            error();
-//                    }
-//                } else
-//                    error();
-//            }
-//        }
+        while (!isSucceed) {
+            //Enter account
+            String name = JOptionPane.showInputDialog(null, "输入用户名：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
+            if (name == null || name.equals("")) exitLobby();
+            String RegTest = HttpRequest.sendGet(URL + "users/hasreg/" + name, "");
+            boolean isCorrect = false;
+            while (!isCorrect) {
+                //Enter password
+                String psw;
+                if (RegTest.equals("N")) {
+                    psw = JOptionPane.showInputDialog(null, "请设置新用户" + name + "的密码：", "你画我猜 -注册", JOptionPane.INFORMATION_MESSAGE);
+                    if (psw == null) break;
+                    if (psw.equals("")) continue;
+                    HttpRequest.doPost(URL + "users/reg/" + name + "/" + encryptToMD5(psw), "", "");
+                    String login = HttpRequest.doPost(URL + "users/login/" + name + "/" + encryptToMD5(psw), "", "");
+                    Player = JSON.parseObject(login, User.class);
+                    isCorrect = true;
+                    isSucceed = true;
+                } else {
+                    psw = JOptionPane.showInputDialog(null, "请输入用户" + name + "的密码：", "你画我猜 -登录", JOptionPane.INFORMATION_MESSAGE);
+                    if (psw == null) break;
+                    if (psw.equals("")) continue;
+                    String loginTest = HttpRequest.doPost(URL + "users/login/" + name + "/" + encryptToMD5(psw), "", "");
+                    if (loginTest != null) {
+                        if (loginTest.contains("password is incorrect")) {
+                            JOptionPane.showMessageDialog(null, "密码错误！", "你画我猜 -密码错误", JOptionPane.WARNING_MESSAGE);
+                        } else if (loginTest.contains("Already Exists")) {
+                            JOptionPane.showMessageDialog(null, "该账号已登录！", "你画我猜 -账号已登录", JOptionPane.WARNING_MESSAGE);
+                            break;
+                        } else {
+                            System.out.println(loginTest);
+                            Player = JSON.parseObject(loginTest, User.class);
+                            isCorrect = true;
+                            isSucceed = true;
+                        }
+                    } else
+                        error();
+                }
+            }
+        }
 
-        String login = HttpRequest.doPost("http://101.34.38.133:8090/users/login/" + "v" + "/" + encryptToMD5("test"), "", "");
-        Player = JSON.parseObject(login, User.class);
+//        String login = HttpRequest.doPost(URL +"users/login/" + "v" + "/" + encryptToMD5("test"), "", "");
+//        Player = JSON.parseObject(login, User.class);
 
         users = getUsers();
         games = getGames();
@@ -162,7 +159,7 @@ public class Lobby extends PApplet {
         String answer = JOptionPane.showInputDialog(null, "请设置房间题目：", "你画我猜", JOptionPane.INFORMATION_MESSAGE);
         if (answer == null) return null;
         String jsonStr = JSON.toJSONString(Player);
-        String result = HttpRequest.doPost("http://101.34.38.133:8090/games/create/" + answer, "", jsonStr);
+        String result = HttpRequest.doPost(URL + "games/create/" + answer, "", jsonStr);
         return JSON.parseObject(result, Game.class);
     }
 
@@ -178,7 +175,7 @@ public class Lobby extends PApplet {
         for (int i = 0; i < rooms.length; i++) {
             if (gameNum > i) {
                 rooms[i] = new Room(new Button(150 + (i % 2) * 250, 85 + (i / 2) * 150, 100, 100), games[i]);
-                String json = HttpRequest.sendGet("http://101.34.38.133:8090/games/" + games[i].getId() + "/players", "");
+                String json = HttpRequest.sendGet(URL + "games/" + games[i].getId() + "/players", "");
                 List<String> list = JSON.parseArray(json, String.class);
                 rooms[i].numberOfPlayer = list.size();
             } else {
@@ -189,12 +186,12 @@ public class Lobby extends PApplet {
 
     private void logout() {
         String userJson = JSON.toJSONString(Player);
-        String result = HttpRequest.doDelete("http://101.34.38.133:8090/users/logout/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
+        String result = HttpRequest.doDelete(URL + "users/logout/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
         System.out.println("Succeed to logout!" + result);
     }
 
     private String[] getUsers() {
-        String json = HttpRequest.sendGet("http://101.34.38.133:8090/users/list", "");
+        String json = HttpRequest.sendGet(URL + "users/list", "");
         List<String> list = JSON.parseArray(json, String.class);
         String[] USERS = new String[list.size()];
         int cur = 0;
@@ -204,7 +201,7 @@ public class Lobby extends PApplet {
     }
 
     private Game[] getGames() {
-        String json = HttpRequest.sendGet("http://101.34.38.133:8090/games", "");
+        String json = HttpRequest.sendGet(URL + "games", "");
         List<String> list = JSON.parseArray(json, String.class);
         Game[] GAMES = new Game[list.size()];
         int cur = 0;
@@ -229,4 +226,6 @@ public class Lobby extends PApplet {
     public void settings() {
         size(WIDTH, HEIGHT);
     }
+
+
 }
