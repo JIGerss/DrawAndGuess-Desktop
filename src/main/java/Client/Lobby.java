@@ -15,8 +15,10 @@ public class Lobby extends PApplet {
     public static boolean isGaming = false;
     private final int WIDTH = 900, HEIGHT = 550;
     private final Room[] rooms = new Room[6];
+    PImage logoutButton;
     private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
     private boolean isVisible = true;
+    private boolean isOnButton = false;
     private boolean hasStartAGame = false;
     private int gameNum = 0;
     private int requestTime = 60;
@@ -24,7 +26,6 @@ public class Lobby extends PApplet {
     private Button logout;
     private User Player;
     private Game[] games;
-    PImage logoutButton;
 
     public static void main(String[] args) {
         PApplet.main("Client.Lobby");
@@ -80,11 +81,11 @@ public class Lobby extends PApplet {
             }
         }
         setVariables();
-        logout = new Button(680, 430, 200, 50);
+        logout = new Button(665, 430, 200, 50);
         System.out.println("Succeed to login!Hello " + Player.getUserName() + " " + Player.getUserId());
         logoutButton = loadImage("logout.png");
         logoutButton.resize(logout.width, logout.height);
-        PFont myFont = createFont("SIMHEI", 30);
+        PFont myFont = createFont("DengXian", 32);
         textFont(myFont);
         noStroke();
         strokeWeight(2);
@@ -104,15 +105,19 @@ public class Lobby extends PApplet {
             setVariables();
         } else
             requestTime++;
-        background(253, 248, 229);
+        background(253, 248, 200);
         textSize(30);
-        fill(253, 248, 120);
-        rect(640, -20, 300, 700);
-        fill(253, 248, 150);
-        rect(650, -20, 300, 700);
+        fill(241, 242, 243);
+        rect(640, 5, 250, 580, 20);
 
-        fill(130, 130, 130);
-        text("在线用户(" + users.length + ")：", (float) (WIDTH / 1.3), (float) (HEIGHT / 10));
+        textSize(25);
+        fill(24, 25, 28);
+        text("在线玩家", 660, 50);
+        textSize(17);
+        fill(148, 153, 160);
+        text("(" + users.length + ")：", 770, 50);
+        fill(24, 25, 28);
+        textSize(25);
         text("点击房间进入游戏：", 30, 50);
         text(Player.getUserName(), (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30));
         textSize(25);
@@ -121,11 +126,11 @@ public class Lobby extends PApplet {
                 text("···", (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 30 + 30 * i));
                 break;
             }
-            if(!users[i].equals(Player.getUserName()))
+            if (!users[i].equals(Player.getUserName()))
                 text(users[i], (float) (WIDTH / 1.24), (float) (HEIGHT / 9 + 70 + 30 * i));
         }
         for (Room room : rooms) {
-            if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height)
+            if (isMovedOnButton(room))
                 fill(190, 163, 162);
             else {
                 if (!room.isGame)
@@ -134,26 +139,27 @@ public class Lobby extends PApplet {
                     fill(255, 198, 180);
             }
             rect(room.button.x, room.button.y, room.button.width, room.button.height, 50);
-            fill(130, 130, 130);
+            fill(24, 25, 28);
             text(room.numberOfPlayer, room.button.x + 45, room.button.y + 56);
         }
-        if (mouseX > logout.x && mouseX < logout.x + logout.width && mouseY > logout.y && mouseY < logout.y + logout.height)
+        if (isMovedOnButton(logout))
             fill(190, 163, 162);
         else
             fill(170, 163, 162);
+
         image(logoutButton, logout.x, logout.y);
-        fill(130, 130, 130);
+        fill(24, 25, 28);
         text("登出游戏", logout.x + 45, logout.y + 34);
     }
 
     public void mousePressed() {
         setVariables();
-        if (mouseX > logout.x && mouseX < logout.x + logout.width && mouseY > logout.y && mouseY < logout.y + logout.height) {
+        if (isMovedOnButton(logout)) {
             logout();
             exitLobby();
         }
         for (Room room : rooms) {
-            if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height) {
+            if (isMovedOnButton(room)) {
                 if (!room.isGame) {
                     Game game = createGame();
                     System.out.println(JSON.toJSONString(game));
@@ -166,7 +172,26 @@ public class Lobby extends PApplet {
                 }
             }
         }
+    }
 
+    private boolean isMovedOnButton(Room room) {
+        if (mouseX > room.button.x && mouseX < room.button.x + room.button.width && mouseY > room.button.y && mouseY < room.button.y + room.button.height) {
+            cursor(HAND);
+            return true;
+        } else {
+            cursor(ARROW);
+            return false;
+        }
+    }
+
+    private boolean isMovedOnButton(Button button) {
+        if (mouseX > button.x && mouseX < button.x + button.width && mouseY > button.y && mouseY < button.y + button.height) {
+            cursor(HAND);
+            return true;
+        } else {
+            cursor(ARROW);
+            return false;
+        }
     }
 
     private void setVariables() {
@@ -183,7 +208,7 @@ public class Lobby extends PApplet {
             String jsonStr = JSON.toJSONString(Player);
             String result = HttpRequest.doPost(URL + "games/create/" + answer, "", jsonStr);
             return JSON.parseObject(result, Game.class);
-        }catch (com.alibaba.fastjson.JSONException e){
+        } catch (com.alibaba.fastjson.JSONException e) {
             error();
         }
         return null;

@@ -119,10 +119,6 @@ public class Clients extends PApplet {
         size(WIDTH, HEIGHT);
     }
 
-    public void closeApplication() {
-        exit();
-    }
-
 }
 
 
