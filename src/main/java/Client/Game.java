@@ -17,6 +17,7 @@ public class Game {
         IsEnd = isEnd;
     }
 
+
     public String getId() {
         return id;
     }

@@ -9,6 +9,7 @@ public class Message {
         Content = content;
     }
 
+
     public User getFrom() {
         return From;
     }
