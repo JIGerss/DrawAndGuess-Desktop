@@ -6,19 +6,21 @@ import processing.core.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class Clients extends PApplet {
-    public static boolean isDrawer = false;
+    public static final int CANVAS_WIDTH = 350, CANVAS_HEIGHT = (int) (CANVAS_WIDTH / 9.0 * 18.0);
+    public static final int WIDTH = 900, HEIGHT = 710;
+    public static boolean isDrawer = true;
     public static String gameId;
     public static User Player;
-    private final int WIDTH = 900, HEIGHT = 710;
     private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
-    private boolean isVisible = true;    public static final int CANVAS_WIDTH = 350, CANVAS_HEIGHT = (int) (CANVAS_WIDTH / 9.0 * 18.0);
+    private boolean isVisible = true;
     private boolean isDrawing = false;
     private int requestTime = 60, postTime = 5;
-    private RelativePoint lastPoint;
+    private List<RelativePoint> offlinePoints;
     private String[] players;
     private Game game;
 
@@ -36,10 +38,16 @@ public class Clients extends PApplet {
 
     public void setup() {
         stroke(20);
+        strokeWeight(2);
         size(WIDTH, HEIGHT);
         URL = convertMD5(URL);
+        offlinePoints = new ArrayList<>();
         //setVariables();
         frameRate(60);
+        background(253, 248, 229);
+        stroke(148, 153, 160);
+        fill(255, 255, 255);
+        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), 8, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 
     public void draw() {
@@ -59,27 +67,50 @@ public class Clients extends PApplet {
             requestTime++;
         }
 
-        background(253, 248, 229);
-        stroke(148, 153, 160);
-        fill(255, 255, 255);
-        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), 8, CANVAS_WIDTH, CANVAS_HEIGHT);
+//        background(253, 248, 229);
+//        stroke(148, 153, 160);
+//        fill(255, 255, 255);
+//        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), 8, CANVAS_WIDTH, CANVAS_HEIGHT);
+        fill(24, 25, 28);
+        stroke(24, 25, 28);
+        if (isDrawer && offlinePoints != null) {
+            for (int i = 0; i < offlinePoints.size() - 1; i++) {
+                line(offlinePoints.get(i).getX(), offlinePoints.get(i).getY(), offlinePoints.get(i + 1).getX(), offlinePoints.get(i + 1).getY());
+            }
+        }
         if (isDrawing && postTime == 5) {
             postTime = 0;
-            fill();
-            line(lastPoint.getX(), lastPoint.getY(), mouseX, mouseY);
+            line(offlinePoints.get(offlinePoints.size() - 1).getX(), offlinePoints.get(offlinePoints.size() - 1).getY(), mouseX, mouseY);
+            offlinePoints.add(new RelativePoint(mouseX, mouseY));
         } else {
             postTime++;
         }
-
+        System.out.println(isDrawing);
     }
 
     public void mousePressed() {
         if (mouseX > (float) (WIDTH / 2 - CANVAS_WIDTH / 2) && mouseX < (float) (WIDTH / 2 + CANVAS_WIDTH / 2)
                 && mouseY > 8 && mouseY < 8 + CANVAS_HEIGHT) {
-            isDrawing = isDrawer;
-            lastPoint = new RelativePoint(mouseX, mouseY);
+            if (isDrawer && !isDrawing) {
+                isDrawing = true;
+                offlinePoints.add(new RelativePoint(mouseX, mouseY));
+            }
         }
 //        quitGame();
+    }
+
+//    public void mouseDragged() {
+//        if (mouseX > (float) (WIDTH / 2 - CANVAS_WIDTH / 2) && mouseX < (float) (WIDTH / 2 + CANVAS_WIDTH / 2)
+//                && mouseY > 8 && mouseY < 8 + CANVAS_HEIGHT) {
+//            if (isDrawer && !isDrawing) {
+//                isDrawing = true;
+//                offlinePoints.add(new RelativePoint(mouseX, mouseY));
+//            }
+//        }
+//    }
+
+    public void mouseReleased() {
+        isDrawing = false;
     }
 
     private void setVariables() {

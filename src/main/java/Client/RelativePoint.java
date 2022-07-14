@@ -1,18 +1,20 @@
 package Client;
 
 public class RelativePoint {
-    private static final float width = Clients.CANVAS_WIDTH;
-    private static final float height = Clients.CANVAS_HEIGHT;
+    private static final float width = Clients.WIDTH;
+    private static final float canvasWidth = Clients.CANVAS_WIDTH;
+    private static final float canvasHeight = Clients.CANVAS_HEIGHT;
+    private static final float posWIDTH = width / 2 - canvasWidth / 2;
     private float x;
     private float y;
 
     public RelativePoint(float x, float y) {
-        this.x = (x - width) / width;
-        this.y = (y - height) / height;
+        this.x = (x - posWIDTH) / canvasWidth;
+        this.y = (y - 8) / canvasHeight;
     }
 
     public float getX() {
-        return x;
+        return x * canvasWidth + posWIDTH;
     }
 
     public void setX(float x) {
@@ -20,7 +22,7 @@ public class RelativePoint {
     }
 
     public float getY() {
-        return y;
+        return y * canvasHeight + 8;
     }
 
     public void setY(float y) {
