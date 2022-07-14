@@ -100,13 +100,15 @@ public class Lobby extends PApplet {
             frame.setVisible(true);
             isVisible = true;
             setVariables();
-        } else if (isGaming && !isVisible)
+        } else if (isGaming && !isVisible){
             return;
+        }
         if (requestTime == 60) {
             requestTime = 0;
             setVariables();
-        } else
+        } else{
             requestTime++;
+        }
         isOnButton = false;
         background(253, 248, 200);
         textSize(30);
@@ -147,12 +149,17 @@ public class Lobby extends PApplet {
                 if (!room.isGame)
                     fill(230, 198, 26);
                 else
-                    fill(255, 198, 26);
+                    fill(200, 198, 26);
             }
             rect(room.button.x, room.button.y, room.button.width, room.button.height, 50);
             fill(24, 25, 28);
             text(room.numberOfPlayer, room.button.x + 40, room.button.y + 59);
             if (room.isGame) {
+                textSize(17);
+                fill(148, 153, 130);
+                text("房主", room.button.x - 70, room.button.y + 29);
+                textSize(25);
+                fill(24, 25, 28);
                 String name = room.game.getDrawerName();
                 if (name.length() > 8)
                     name = name.substring(0, 5) + "...";
@@ -163,13 +170,12 @@ public class Lobby extends PApplet {
                 text("        空", room.button.x - 100, room.button.y + 59);
         }
         if (isMovedOnButton(logout))
-            fill(190, 163, 162);
+            fill(80, 80, 80);
         else
-            fill(170, 163, 162);
+            fill(24, 25, 28);
 
         image(logoutButton, logout.x, logout.y);
         textSize(25);
-        fill(24, 25, 28);
         text("登出游戏", logout.x + 45, logout.y + 34);
         if (isOnButton) cursor(HAND);
         else cursor(ARROW);

@@ -13,10 +13,12 @@ public class Clients extends PApplet {
     public static boolean isDrawer = false;
     public static String gameId;
     public static User Player;
-    private final int WIDTH = 900, HEIGHT = 550;
+    private final int WIDTH = 900, HEIGHT = 710;
     private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
-    private boolean isVisible = true;
-    private int requestTime = 60;
+    private boolean isVisible = true;    public static final int CANVAS_WIDTH = 350, CANVAS_HEIGHT = (int) (CANVAS_WIDTH / 9.0 * 18.0);
+    private boolean isDrawing = false;
+    private int requestTime = 60, postTime = 5;
+    private RelativePoint lastPoint;
     private String[] players;
     private Game game;
 
@@ -36,31 +38,48 @@ public class Clients extends PApplet {
         stroke(20);
         size(WIDTH, HEIGHT);
         URL = convertMD5(URL);
-        setVariables();
+        //setVariables();
+        frameRate(60);
     }
 
     public void draw() {
         if (Lobby.isGaming && !isVisible) {
-            Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+            Frame frame = ((PSurfaceAWT.SmoothCanvas) surface.getNative()).getFrame();
             frame.setVisible(true);
             isVisible = true;
             setVariables();
-        } else if (!Lobby.isGaming && !isVisible)
+        } else if (!Lobby.isGaming && !isVisible) {
             return;
+        }
         if (requestTime == 60) {
             requestTime = 0;
-            game = getGame();
-            players = getUsersInGame();
-        } else
+//            game = getGame();
+//            players = getUsersInGame();
+        } else {
             requestTime++;
+        }
 
         background(253, 248, 229);
+        stroke(148, 153, 160);
+        fill(255, 255, 255);
+        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), 8, CANVAS_WIDTH, CANVAS_HEIGHT);
+        if (isDrawing && postTime == 5) {
+            postTime = 0;
+            fill();
+            line(lastPoint.getX(), lastPoint.getY(), mouseX, mouseY);
+        } else {
+            postTime++;
+        }
 
     }
 
     public void mousePressed() {
-
-        quitGame();
+        if (mouseX > (float) (WIDTH / 2 - CANVAS_WIDTH / 2) && mouseX < (float) (WIDTH / 2 + CANVAS_WIDTH / 2)
+                && mouseY > 8 && mouseY < 8 + CANVAS_HEIGHT) {
+            isDrawing = isDrawer;
+            lastPoint = new RelativePoint(mouseX, mouseY);
+        }
+//        quitGame();
     }
 
     private void setVariables() {
@@ -82,7 +101,7 @@ public class Clients extends PApplet {
         System.out.println("Succeed to quit game!" + result);
         Lobby.isGaming = false;
         isVisible = false;
-        Frame frame = ((PSurfaceAWT.SmoothCanvas) ((PSurfaceAWT) surface).getNative()).getFrame();
+        Frame frame = ((PSurfaceAWT.SmoothCanvas) surface.getNative()).getFrame();
         frame.setVisible(false);
     }
 
@@ -118,6 +137,9 @@ public class Clients extends PApplet {
     public void settings() {
         size(WIDTH, HEIGHT);
     }
+
+
+
 
 }
 
