@@ -16,7 +16,7 @@ public class Lobby extends PApplet {
     public static boolean isGaming = false;
     private final int WIDTH = 900, HEIGHT = 550, CHOICES = 5;
     private final Room[] rooms = new Room[6];
-    PImage logoutButton;
+    private PImage logoutButton;
     private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
     private boolean isVisible = true;
     private boolean isOnButton = false;

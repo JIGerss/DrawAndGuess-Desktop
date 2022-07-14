@@ -1,17 +1,17 @@
 package Client;
 
 public class Line {
-    private RelativePoint[] Points;
+    private RelativePoint[] points;
 
     public Line(RelativePoint[] points) {
-        Points = points;
+        this.points = points;
     }
 
     public RelativePoint[] getPoints() {
-        return Points;
+        return points;
     }
 
     public void setPoints(RelativePoint[] points) {
-        Points = points;
+        this.points = points;
     }
 }
