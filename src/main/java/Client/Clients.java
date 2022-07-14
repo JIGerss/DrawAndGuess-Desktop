@@ -11,16 +11,16 @@ import java.util.List;
 
 
 public class Clients extends PApplet {
-    public static final int CANVAS_WIDTH = 350, CANVAS_HEIGHT = (int) (CANVAS_WIDTH / 9.0 * 18.0);
     public static final int WIDTH = 900, HEIGHT = 710;
     public static boolean isDrawer = true;
     public static String gameId;
     public static User Player;
-    private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";
+    private String URL = "\u001C\u0000\u0000\u0004N[[EDEZG@ZGLZEGGNLDMD[";    public static final int CANVAS_WIDTH = 350, CANVAS_HEIGHT = (int) (CANVAS_WIDTH / 9.0 * 18.0);
     private boolean isVisible = true;
-    private boolean isDrawing = false;
-    private int requestTime = 60, postTime = 5;
+    private boolean isDrawing = false;    private static final float leftX = (float) (WIDTH / 2 - CANVAS_WIDTH / 2), UpY = 8;
+    private int requestTime = 60;
     private List<RelativePoint> offlinePoints;
+    private List<Line> offlineLines;
     private String[] players;
     private Game game;
 
@@ -42,12 +42,13 @@ public class Clients extends PApplet {
         size(WIDTH, HEIGHT);
         URL = convertMD5(URL);
         offlinePoints = new ArrayList<>();
+        offlineLines = new ArrayList<>();
         //setVariables();
-        frameRate(60);
+        frameRate(100);
         background(253, 248, 229);
         stroke(148, 153, 160);
         fill(255, 255, 255);
-        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), 8, CANVAS_WIDTH, CANVAS_HEIGHT);
+        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), UpY, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 
     public void draw() {
@@ -59,7 +60,7 @@ public class Clients extends PApplet {
         } else if (!Lobby.isGaming && !isVisible) {
             return;
         }
-        if (requestTime == 60) {
+        if (requestTime == 120) {
             requestTime = 0;
 //            game = getGame();
 //            players = getUsersInGame();
@@ -70,27 +71,36 @@ public class Clients extends PApplet {
 //        background(253, 248, 229);
 //        stroke(148, 153, 160);
 //        fill(255, 255, 255);
-//        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), 8, CANVAS_WIDTH, CANVAS_HEIGHT);
+//        rect((float) (WIDTH / 2 - CANVAS_WIDTH / 2), UpY, CANVAS_WIDTH, CANVAS_HEIGHT);
         fill(24, 25, 28);
         stroke(24, 25, 28);
-        if (isDrawer && offlinePoints != null) {
-            for (int i = 0; i < offlinePoints.size() - 1; i++) {
+        if (isDrawer && isDrawing) {
+            for (int i = 0; i < offlinePoints.size() - 1; i++)
                 line(offlinePoints.get(i).getX(), offlinePoints.get(i).getY(), offlinePoints.get(i + 1).getX(), offlinePoints.get(i + 1).getY());
+            for (Line offlineLine : offlineLines) {
+                RelativePoint[] relativePoints = offlineLine.getPoints();
+                for (int j = 0; j < relativePoints.length - 1; j++)
+                    line(relativePoints[j].getX(), relativePoints[j].getY(), relativePoints[j + 1].getX(), relativePoints[j + 1].getY());
             }
         }
-        if (isDrawing && postTime == 5) {
-            postTime = 0;
-            line(offlinePoints.get(offlinePoints.size() - 1).getX(), offlinePoints.get(offlinePoints.size() - 1).getY(), mouseX, mouseY);
-            offlinePoints.add(new RelativePoint(mouseX, mouseY));
-        } else {
-            postTime++;
+
+        if (isDrawing) {
+            if (isOnCanvas())
+                offlinePoints.add(new RelativePoint(mouseX, mouseY));
+            else {
+                float x = mouseX, y = mouseY;
+                if (mouseX < leftX || mouseX > leftX + CANVAS_WIDTH)
+                    x = (mouseX <= leftX) ? (leftX + 2) : (leftX + CANVAS_WIDTH - 2);
+                if (mouseY < UpY || mouseY > UpY + CANVAS_HEIGHT)
+                    y = (mouseY < UpY) ? (UpY + 2) : (UpY + CANVAS_HEIGHT - 2);
+                offlinePoints.add(new RelativePoint(x, y));
+            }
         }
-        System.out.println(isDrawing);
+
     }
 
     public void mousePressed() {
-        if (mouseX > (float) (WIDTH / 2 - CANVAS_WIDTH / 2) && mouseX < (float) (WIDTH / 2 + CANVAS_WIDTH / 2)
-                && mouseY > 8 && mouseY < 8 + CANVAS_HEIGHT) {
+        if (isOnCanvas()) {
             if (isDrawer && !isDrawing) {
                 isDrawing = true;
                 offlinePoints.add(new RelativePoint(mouseX, mouseY));
@@ -99,18 +109,19 @@ public class Clients extends PApplet {
 //        quitGame();
     }
 
-//    public void mouseDragged() {
-//        if (mouseX > (float) (WIDTH / 2 - CANVAS_WIDTH / 2) && mouseX < (float) (WIDTH / 2 + CANVAS_WIDTH / 2)
-//                && mouseY > 8 && mouseY < 8 + CANVAS_HEIGHT) {
-//            if (isDrawer && !isDrawing) {
-//                isDrawing = true;
-//                offlinePoints.add(new RelativePoint(mouseX, mouseY));
-//            }
-//        }
-//    }
-
     public void mouseReleased() {
         isDrawing = false;
+        RelativePoint[] relativePoints = new RelativePoint[offlinePoints.size()];
+        int cur = 0;
+        for (RelativePoint p : offlinePoints)
+            relativePoints[cur++] = p;
+        offlineLines.add(new Line(relativePoints));
+        offlinePoints = new ArrayList<>();
+    }
+
+    private boolean isOnCanvas() {
+        return mouseX > leftX && mouseX < leftX + CANVAS_WIDTH
+                && mouseY > UpY && mouseY < UpY + CANVAS_HEIGHT;
     }
 
     private void setVariables() {
@@ -168,6 +179,8 @@ public class Clients extends PApplet {
     public void settings() {
         size(WIDTH, HEIGHT);
     }
+
+
 
 
 
