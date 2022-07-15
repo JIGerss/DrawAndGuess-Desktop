@@ -26,7 +26,6 @@ public class Clients extends PApplet {
     private List<Line> offlineLines;
     private String[] players;
     private Button logout;
-    private Game game;
 
     public static void main(String[] args) {
         PApplet.main("Client.Clients");
@@ -45,8 +44,6 @@ public class Clients extends PApplet {
         strokeWeight(2);
         size(WIDTH, HEIGHT);
         URL = convertMD5(URL);
-        offlinePoints = new ArrayList<>();
-        offlineLines = new ArrayList<>();
         setVariables();
         logout = new Button(665, 430, 200, 50);
         logoutButton = loadImage("logout.png");
@@ -61,15 +58,15 @@ public class Clients extends PApplet {
             Frame frame = ((PSurfaceAWT.SmoothCanvas) surface.getNative()).getFrame();
             frame.setVisible(true);
             isVisible = true;
-            offlinePoints = new ArrayList<>();
-            offlineLines = new ArrayList<>();
             setVariables();
         } else if (!Lobby.isGaming && !isVisible) {
             return;
         }
         if (requestTime == 120) {
             requestTime = 0;
-            game = getGame();
+            if (!isDrawer) {
+                offlineLines = getLines();
+            }
             players = getUsersInGame();
         } else {
             requestTime++;
@@ -83,11 +80,13 @@ public class Clients extends PApplet {
         stroke(24, 25, 28);
         if (isDrawer) {
             for (int i = 0; i < offlinePoints.size() - 1; i++)
-                line(offlinePoints.get(i).getX(), offlinePoints.get(i).getY(), offlinePoints.get(i + 1).getX(), offlinePoints.get(i + 1).getY());
+                line(offlinePoints.get(i).getProcessedX(), offlinePoints.get(i).getProcessedY(), offlinePoints.get(i + 1).getProcessedX(), offlinePoints.get(i + 1).getProcessedY());
+        }
+        if (offlineLines != null) {
             for (Line offlineLine : offlineLines) {
                 RelativePoint[] relativePoints = offlineLine.getPoints();
                 for (int j = 0; j < relativePoints.length - 1; j++)
-                    line(relativePoints[j].getX(), relativePoints[j].getY(), relativePoints[j + 1].getX(), relativePoints[j + 1].getY());
+                    line(relativePoints[j].getProcessedX(), relativePoints[j].getProcessedY(), relativePoints[j + 1].getProcessedX(), relativePoints[j + 1].getProcessedY());
             }
         }
 
@@ -126,7 +125,7 @@ public class Clients extends PApplet {
     public void mouseReleased() {
         if (isMovedOnButton(logout)) {
             Object[] options = {"退出房间", "退出房间并退出游戏"};
-            int op = JOptionPane.showOptionDialog(null, "退出房间 或 退出房间并退出游戏", "你画我猜 -退出房间",JOptionPane.YES_NO_CANCEL_OPTION ,JOptionPane.QUESTION_MESSAGE,null, options, options[0]);
+            int op = JOptionPane.showOptionDialog(null, "退出房间 或 退出房间并退出游戏", "你画我猜 -退出房间", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
             quitGame(op == 1);
         }
         if (isDrawer) {
@@ -139,6 +138,16 @@ public class Clients extends PApplet {
             offlinePoints = new ArrayList<>();
             postLines();
         }
+    }
+
+    private ArrayList<Line> getLines() {
+        ArrayList<Line> lines = new ArrayList<>();
+        String result = HttpRequest.sendGet(URL + "games/" + gameId + "/lines", "");
+        List<String> list = JSON.parseArray(result, String.class);
+        for (String s : list) {
+            lines.add(JSON.parseObject(s, Line.class));
+        }
+        return lines;
     }
 
     private void postLines() {
@@ -163,22 +172,21 @@ public class Clients extends PApplet {
 
     private void setVariables() {
         String result = null;
+        offlinePoints = new ArrayList<>();
+        offlineLines = new ArrayList<>();
+        if (!isDrawer) {
+            offlineLines = getLines();
+        }
         if (!isDrawer) result = HttpRequest.doPost(URL + "games/" + gameId + "/join", "", JSON.toJSONString(Player));
-        game = getGame();
         players = getUsersInGame();
         System.out.println("Succeed to join game! " + result);
     }
 
-    private Game getGame() {
-        String json = HttpRequest.sendGet(URL + "games/" + gameId, "");
-        return JSON.parseObject(json, Game.class);
-    }
-
     private void quitGame(boolean Logout) {
         String userJson = JSON.toJSONString(Player);
-        String result = HttpRequest.doDelete(URL + "games/" + game.getId() + "/leave/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
+        String result = HttpRequest.doDelete(URL + "games/" + gameId + "/leave/" + Player.getUserName() + "/" + Player.getUserId(), "", userJson);
         System.out.println("Succeed to quit game!" + result);
-        if(Logout) logout();
+        if (Logout) logout();
         Lobby.isGaming = false;
         isVisible = false;
         Frame frame = ((PSurfaceAWT.SmoothCanvas) surface.getNative()).getFrame();
@@ -186,7 +194,7 @@ public class Clients extends PApplet {
     }
 
     private String[] getUsersInGame() {
-        String json = HttpRequest.sendGet(URL + "games/" + game.getId() + "/players", "");
+        String json = HttpRequest.sendGet(URL + "games/" + gameId + "/players", "");
         List<String> list = JSON.parseArray(json, String.class);
         String[] USERNAMES = new String[list.size()];
         int cur = 0;
@@ -218,7 +226,6 @@ public class Clients extends PApplet {
     public void settings() {
         size(WIDTH, HEIGHT);
     }
-
 
 }
 

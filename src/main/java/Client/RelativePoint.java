@@ -13,7 +13,7 @@ public class RelativePoint {
         this.y = (y - 8) / canvasHeight;
     }
 
-    public float getX() {
+    public float getProcessedX() {
         return x * canvasWidth + posWIDTH;
     }
 
@@ -21,11 +21,19 @@ public class RelativePoint {
         this.x = x;
     }
 
-    public float getY() {
+    public float getProcessedY() {
         return y * canvasHeight + 8;
     }
 
     public void setY(float y) {
         this.y = y;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
     }
 }
