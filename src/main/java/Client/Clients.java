@@ -21,7 +21,7 @@ public class Clients extends PApplet {
     private boolean isVisible = true;
     private boolean isDrawing = false;
     private boolean isOnButton = false;
-    private int requestTime = 60;
+    private int requestTime = 0, postTime = 0;
     private List<RelativePoint> offlinePoints;
     private List<Line> offlineLines;
     private String[] players;
@@ -62,11 +62,8 @@ public class Clients extends PApplet {
         } else if (!Lobby.isGaming && !isVisible) {
             return;
         }
-        if (requestTime == 120) {
+        if (requestTime == 200) {
             requestTime = 0;
-            if (!isDrawer) {
-                offlineLines = getLines();
-            }
             players = getUsersInGame();
         } else {
             requestTime++;
@@ -81,7 +78,14 @@ public class Clients extends PApplet {
         if (isDrawer) {
             for (int i = 0; i < offlinePoints.size() - 1; i++)
                 line(offlinePoints.get(i).getProcessedX(), offlinePoints.get(i).getProcessedY(), offlinePoints.get(i + 1).getProcessedX(), offlinePoints.get(i + 1).getProcessedY());
+            if (isDrawing && postTime == 20) {
+                offlineLines.add(packagePoints());
+                postLines();
+            }
+        } else if (postTime == 20) {
+            offlineLines = getLines();
         }
+        if (postTime == 20) postTime = 0;
         if (offlineLines != null) {
             for (Line offlineLine : offlineLines) {
                 RelativePoint[] relativePoints = offlineLine.getPoints();
@@ -118,26 +122,37 @@ public class Clients extends PApplet {
     public void mousePressed() {
         if (isOnCanvas() && isDrawer && !isDrawing) {
             isDrawing = true;
+            RelativePoint[] points = {new RelativePoint(0, 0), new RelativePoint(0, 0)};
+            offlineLines.add(new Line(points));
             offlinePoints.add(new RelativePoint(mouseX, mouseY));
         }
     }
 
-    public void mouseReleased() {
+    public void mouseClicked() {
         if (isMovedOnButton(logout)) {
             Object[] options = {"退出房间", "退出房间并退出游戏"};
             int op = JOptionPane.showOptionDialog(null, "退出房间 或 退出房间并退出游戏", "你画我猜 -退出房间", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
             quitGame(op == 1);
         }
+    }
+
+    public void mouseReleased() {
         if (isDrawer) {
             isDrawing = false;
-            RelativePoint[] relativePoints = new RelativePoint[offlinePoints.size()];
-            int cur = 0;
-            for (RelativePoint p : offlinePoints)
-                relativePoints[cur++] = p;
-            offlineLines.add(new Line(relativePoints));
+            offlineLines.add(packagePoints());
             offlinePoints = new ArrayList<>();
             postLines();
         }
+    }
+
+    private Line packagePoints() {
+        RelativePoint[] relativePoints = new RelativePoint[offlinePoints.size()];
+        int cur = 0;
+        for (RelativePoint p : offlinePoints)
+            relativePoints[cur++] = p;
+        offlineLines.remove(offlineLines.size() - 1);
+        offlineLines.add(new Line(relativePoints));
+        return new Line(relativePoints);
     }
 
     private ArrayList<Line> getLines() {
@@ -179,7 +194,7 @@ public class Clients extends PApplet {
         }
         if (!isDrawer) result = HttpRequest.doPost(URL + "games/" + gameId + "/join", "", JSON.toJSONString(Player));
         players = getUsersInGame();
-        System.out.println("Succeed to join game! " + result);
+        System.out.println("Succeed to join game!");
     }
 
     private void quitGame(boolean Logout) {

@@ -100,13 +100,13 @@ public class Lobby extends PApplet {
             frame.setVisible(true);
             isVisible = true;
             setVariables();
-        } else if (isGaming && !isVisible){
+        } else if (isGaming && !isVisible) {
             return;
         }
         if (requestTime == 60) {
             requestTime = 0;
             setVariables();
-        } else{
+        } else {
             requestTime++;
         }
         isOnButton = false;
@@ -130,7 +130,7 @@ public class Lobby extends PApplet {
         for (int i = 0; i < 7; i++) {
             line(660, 100 + i * 40, 865, 100 + i * 40);
         }
-        for (int i = 0; i < users.length; i++) {
+        for (int i = 0, j = 0; i < users.length; i++, j++) {
             if (i >= 5) {
                 text("···········", 670, 130 + i * 40);
                 break;
@@ -139,8 +139,9 @@ public class Lobby extends PApplet {
                 String name = users[i];
                 if (name.length() > 16)
                     name = name.substring(0, 13) + "...";
-                text(name, 670, 130 + i * 40);
-            }
+                text(name, 670, 130 + j * 40);
+            } else
+                j--;
         }
         for (Room room : rooms) {
             if (isMovedOnButton(room.button))
