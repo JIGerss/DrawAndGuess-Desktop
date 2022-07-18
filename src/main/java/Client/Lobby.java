@@ -131,7 +131,7 @@ public class Lobby extends PApplet {
             line(660, 100 + i * 40, 865, 100 + i * 40);
         }
         for (int i = 0, j = 0; i < users.length; i++, j++) {
-            if (i >= 5) {
+            if (j >= 5) {
                 text("···········", 670, 130 + i * 40);
                 break;
             }
