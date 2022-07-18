@@ -30,7 +30,6 @@
             <version>1.4.9</version>
         </dependency>
 
-
         <!-- FastJSON -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -44,7 +43,6 @@
             <artifactId>json</artifactId>
             <version>20220320</version>
         </dependency>
-
 
     </dependencies>
 
