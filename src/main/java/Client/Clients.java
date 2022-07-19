@@ -86,6 +86,7 @@ public class Clients extends PApplet {
             offlineLines = getLines();
         }
         if (postTime == 20) postTime = 0;
+        else postTime ++;
         if (offlineLines != null) {
             for (Line offlineLine : offlineLines) {
                 RelativePoint[] relativePoints = offlineLine.getPoints();
