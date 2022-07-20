@@ -20,7 +20,7 @@
         <configuration>
           <transformers>
             <transformer>
-              <mainClass>Client.Lobby</mainClass>
+              <mainClass>Threads.Lobby</mainClass>
             </transformer>
           </transformers>
         </configuration>

@@ -1,4 +1,4 @@
-package Client;
+package Structures;
 
 public class PostLine {
     private User from;
